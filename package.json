@@ -1,0 +1,14 @@
+{
+  "name": "com.tcs.bootstrapper",
+  "displayName": "TCS Bootstrapper",
+  "description": "A simple bootstrapper for Unity",
+  "version": "1.0.1",
+  "keywords": ["bootstrapper", "unity", "simple"],
+  "category": "Tent City Studio",
+  "dependencies": {},
+  "author": {
+    "name": "Damon Fedorick",
+    "url": "https://github.com/Ddemon26/TCS-Bootstrapper"
+  },
+  "documentationUrl": "https://github.com/Ddemon26/TCS-Bootstrapper/blob/main/README.md"
+}
