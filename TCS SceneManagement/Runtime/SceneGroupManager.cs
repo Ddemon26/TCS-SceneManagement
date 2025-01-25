@@ -7,7 +7,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
-namespace TCS.Bootstrapper {
+namespace TCS.SceneManagement {
     public class SceneGroupManager {
         public event Action<string> OnSceneLoaded = delegate { };
         public event Action<string> OnSceneUnloaded = delegate { };

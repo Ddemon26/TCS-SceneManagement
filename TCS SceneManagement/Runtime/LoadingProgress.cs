@@ -1,5 +1,5 @@
 using System;
-namespace TCS.Bootstrapper {
+namespace TCS.SceneManagement {
     public class LoadingProgress : IProgress<float> {
         public event Action<float> Progressed;
 

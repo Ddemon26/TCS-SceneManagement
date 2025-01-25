@@ -8,10 +8,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
-namespace TCS.Bootstrapper {
-    /// <summary>
-    /// Manages loading and unloading of a single scene (Regular or Addressable).
-    /// </summary>
+namespace TCS.SceneManagement {
     public class SceneSingleManager {
         public event Action<string> OnSceneLoaded = delegate { };
         public event Action<string> OnSceneUnloaded = delegate { };
@@ -36,24 +33,19 @@ namespace TCS.Bootstrapper {
                     // Scene is already loaded, do nothing
                     return;
                 }
-
-                // Unload current scene first
-                await UnloadScene();
             }
 
             // Before loading a new scene, clear any leftover handles
             m_handleGroup.Handles.Clear();
 
-            // We'll track progress by either using AsyncOperation (for regular scenes)
-            // or AsyncOperationHandle (for addressable scenes).
             var operationGroup = new AsyncOperationGroup(1);
 
             if (sceneRef.State == SceneReferenceState.Regular) {
                 // Built-in scene
-                var loadOp = SceneManager.LoadSceneAsync(sceneRef.Path, LoadSceneMode.Additive);
+                var loadOp = SceneManager.LoadSceneAsync(sceneRef.Name, LoadSceneMode.Additive);
 
-                // (Optional) Simulate long loading time - remove if you don't need it:
-                await Task.Delay(TimeSpan.FromSeconds(10f));
+                // (Optional) Simulate long loading time
+                await Task.Delay(TimeSpan.FromSeconds(1f));
 
                 if (loadOp != null) {
                     operationGroup.Operations.Add(loadOp);
@@ -61,13 +53,13 @@ namespace TCS.Bootstrapper {
             }
             else if (sceneRef.State == SceneReferenceState.Addressable) {
                 // Addressable scene
-                AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(sceneRef.Path, LoadSceneMode.Additive);
+                AsyncOperationHandle<SceneInstance> handle =
+                    Addressables.LoadSceneAsync(sceneRef.Path, LoadSceneMode.Additive);
                 m_handleGroup.Handles.Add(handle);
             }
 
             // Wait until both the regular and addressable operations are done (if they exist)
             while (!operationGroup.IsDone || !m_handleGroup.IsDone) {
-                // Combine progress from built-in and addressable in a naive way
                 float combined = (operationGroup.Progress + m_handleGroup.Progress) / 2f;
                 progress?.Report(combined);
 
@@ -75,61 +67,69 @@ namespace TCS.Bootstrapper {
             }
 
             // Try setting the newly loaded scene as active
-            var loadedScene = SceneManager.GetSceneByName(sceneRef.Path);
+            var loadedScene = SceneManager.GetSceneByName(sceneRef.Name);
             if (loadedScene.IsValid()) {
                 SceneManager.SetActiveScene(loadedScene);
             }
 
-            m_activeSceneName = sceneRef.Path;
+            m_activeSceneName = sceneRef.Name;
             OnSceneLoaded.Invoke(m_activeSceneName);
         }
 
         /// <summary>
-        /// Unloads the currently active scene if it exists.
+        /// Unloads the given scene (Regular or Addressable) using its SceneReference.
         /// </summary>
-        public async Task UnloadScene() {
-            if (string.IsNullOrEmpty(m_activeSceneName)) {
-                // No active scene to unload
+        /// <param name="sceneRef">Reference to the scene to unload.</param>
+        public async Task UnloadScene(SceneReference sceneRef) {
+            // Check if the target scene is valid and loaded
+            var scene = SceneManager.GetSceneByName(sceneRef.Name);
+            if (!scene.IsValid() || !scene.isLoaded) {
+                Debug.LogWarning($"Scene '{sceneRef.Name}' is not loaded.");
+                // Scene not loaded, do nothing or optionally log a warning
                 return;
             }
 
-            // Unload if it's a regular (non-addressable) scene
-            var current = SceneManager.GetSceneByName(m_activeSceneName);
-            if (current.IsValid() && current.isLoaded) {
-                var unloadOp = SceneManager.UnloadSceneAsync(m_activeSceneName);
+            if (sceneRef.State == SceneReferenceState.Regular) {
+                // Unload a built-in scene
+                var unloadOp = SceneManager.UnloadSceneAsync(sceneRef.Name);
                 if (unloadOp != null) {
                     var opGroup = new AsyncOperationGroup(1);
                     opGroup.Operations.Add(unloadOp);
 
-                    OnSceneUnloaded.Invoke(m_activeSceneName);
-
-                    // Wait until the unload operation is finished
+                    // Wait for unload to finish
                     while (!opGroup.IsDone) {
                         await Task.Delay(100);
                     }
                 }
             }
-
-            // Unload if it's an addressable scene
-            foreach (AsyncOperationHandle<SceneInstance> handle in m_handleGroup.Handles.Where(h => h.IsValid())) {
-                // Ensure we're unloading the correct scene instance
-                if (handle.Result.Scene.name.Equals(m_activeSceneName, StringComparison.Ordinal)) {
-                    Addressables.UnloadSceneAsync(handle);
+            else if (sceneRef.State == SceneReferenceState.Addressable) {
+                // Unload an addressable scene
+                foreach (AsyncOperationHandle<SceneInstance> handle in m_handleGroup.Handles.Where(h => h.IsValid())) {
+                    if (handle.Result.Scene.name.Equals(sceneRef.Name, StringComparison.Ordinal)) {
+                        // Wait for the scene to unload properly
+                        await Addressables.UnloadSceneAsync(handle).Task;
+                        break;
+                    }
                 }
             }
 
-            // Clear the handle group since we're done
+            // Fire the unload event
+            OnSceneUnloaded.Invoke(sceneRef.Name);
+
+            // Clear the handle group since we're done with this scene
             m_handleGroup.Handles.Clear();
 
-            // Remove the reference
-            m_activeSceneName = null;
+            // If the scene we unloaded was also stored as "active" in the manager, clear it
+            if (m_activeSceneName == sceneRef.Name) {
+                m_activeSceneName = null;
+            }
 
-            // (Optional) Unload unused assets:
+            // (Optional) Unload unused assets to free memory
             // await Resources.UnloadUnusedAssets();
         }
 
-        bool IsSceneLoaded(SceneReference sceneRef) {
-            var scene = SceneManager.GetSceneByName(sceneRef.Path);
+        static bool IsSceneLoaded(SceneReference sceneRef) {
+            var scene = SceneManager.GetSceneByName(sceneRef.Name);
             return scene.IsValid() && scene.isLoaded;
         }
     }

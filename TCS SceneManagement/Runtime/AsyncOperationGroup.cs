@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-namespace TCS.Bootstrapper {
+namespace TCS.SceneManagement {
     public readonly struct AsyncOperationGroup { 
         public readonly List<AsyncOperation> Operations;
 

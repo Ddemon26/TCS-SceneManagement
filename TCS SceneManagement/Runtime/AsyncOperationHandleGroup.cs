@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
-namespace TCS.Bootstrapper {
+namespace TCS.SceneManagement {
     public readonly struct AsyncOperationHandleGroup {
         public readonly List<AsyncOperationHandle<SceneInstance>> Handles;
         

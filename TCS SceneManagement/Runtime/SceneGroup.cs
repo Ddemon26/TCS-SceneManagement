@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Eflatun.SceneReference;
-namespace TCS.Bootstrapper {
+namespace TCS.SceneManagement {
     [Serializable]
     public class SceneGroup {
         public string m_groupName = "New Scene Group";
