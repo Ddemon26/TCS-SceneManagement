@@ -26,7 +26,7 @@ namespace TCS.SceneManagement {
         /// <param name="sceneRef">Scene reference to load.</param>
         /// <param name="progress">Progress object for reporting loading progress (0..1).</param>
         /// <param name="reloadIfLoaded">Whether to unload/reload if this scene is already loaded.</param>
-        public async Task LoadScene(SceneReference sceneRef, IProgress<float> progress, bool reloadIfLoaded = false) {
+        public async Task LoadSceneAsync(SceneReference sceneRef, IProgress<float> progress, bool reloadIfLoaded = false) {
             // Check if the scene is already loaded
             if (IsSceneLoaded(sceneRef)) {
                 if (!reloadIfLoaded) {
@@ -80,7 +80,7 @@ namespace TCS.SceneManagement {
         /// Unloads the given scene (Regular or Addressable) using its SceneReference.
         /// </summary>
         /// <param name="sceneRef">Reference to the scene to unload.</param>
-        public async Task UnloadScene(SceneReference sceneRef) {
+        public async Task UnloadSceneAsync(SceneReference sceneRef) {
             // Check if the target scene is valid and loaded
             var scene = SceneManager.GetSceneByName(sceneRef.Name);
             if (!scene.IsValid() || !scene.isLoaded) {
