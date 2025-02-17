@@ -1,14 +1,14 @@
 {
-  "name": "com.tcs.bootstrapper",
-  "displayName": "TCS Bootstrapper",
-  "description": "A simple bootstrapper for Unity",
+  "name": "com.tcs.scenemanagement",
+  "displayName": "TCS Scene Management",
+  "description": "Scene Management Solution for Unity",
   "version": "1.0.1",
-  "keywords": ["bootstrapper", "unity", "simple"],
+  "keywords": ["scene, management", "unity", "simple"],
   "category": "Tent City Studio",
   "dependencies": {},
   "author": {
     "name": "Damon Fedorick",
-    "url": "https://github.com/Ddemon26/TCS-Bootstrapper"
+    "url": "https://github.com/Ddemon26/TCS-SceneManagement"
   },
-  "documentationUrl": "https://github.com/Ddemon26/TCS-Bootstrapper/blob/main/README.md"
+  "documentationUrl": "https://github.com/Ddemon26/TCS-SceneManagement/blob/main/README.md"
 }
