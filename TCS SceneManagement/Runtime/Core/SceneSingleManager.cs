@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Eflatun.SceneReference;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -28,7 +29,7 @@ namespace TCS.SceneManagement {
         /// <param name="progress">Progress object for reporting loading progress (0..1).</param>
         /// <param name="token"></param>
         /// <param name="reloadIfLoaded">Whether to unload/reload if this scene is already loaded.</param>
-        public async Task LoadSceneAsync(SceneReference sceneRef, IProgress<float> progress, CancellationToken token, bool reloadIfLoaded = false) {
+        public async Task LoadSceneAsync(SceneReference sceneRef, [CanBeNull] IProgress<float> progress, CancellationToken token, bool reloadIfLoaded = false) {
             if (IsSceneLoaded(sceneRef)) {
                 if (!reloadIfLoaded) {
                     return;
